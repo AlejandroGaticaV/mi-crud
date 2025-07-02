@@ -1,68 +1,48 @@
-  import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Form from './components/Form';
 import List from './components/List';
-import './App.css'
+import './App.css';
 
 function App() {
-  // Estado que guarda la lista de items
-  const [items, setItems] = useState([]);
+  const [alumnos, setAlumnos] = useState([]);
+  const [alumnoEditar, setAlumnoEditar] = useState(null);
 
-  // Estado que guarda el item que se esta editando (si hay uno)
-  const [itemToEdit, setItemToEdit] = useState(null);
-
-  // Al iniciar la app, se cargan los items desde localStorage
+  // Cargar datos desde localStorage al iniciar
   useEffect(() => {
-    const storedItems = JSON.parse(localStorage.getItem('items')) || [];
-    setItems(storedItems);
+    const datosGuardados = JSON.parse(localStorage.getItem('alumnos')) || [];
+    setAlumnos(datosGuardados);
   }, []);
 
-  // Cada vez que cambia la lista de items, se actualiza en localStorage
+  // Guardar datos en localStorage cada vez que cambia la lista
   useEffect(() => {
-    localStorage.setItem('items', JSON.stringify(items));
-  }, [items]);
+    localStorage.setItem('alumnos', JSON.stringify(alumnos));
+  }, [alumnos]);
 
-  // Funcion que agrega un nuevo item o actualiza uno existente
-  const addOrUpdateItem = (value) => {
-    if (itemToEdit) {
-      // Si hay un item en edicion, se actualiza
-      setItems(items.map(item =>
-        item.id === itemToEdit.id
-          ? { ...item, value } // actualiza el valor
-          : item // los demas quedan igual
-      ));
-      setItemToEdit(null); // limpia el estado de edicion
+  // Agrega un nuevo alumno o actualiza uno existente
+  const agregarOActualizarAlumno = (alumno) => {
+    if (alumnoEditar) {
+      setAlumnos(alumnos.map((a) => (a.id === alumnoEditar.id ? alumno : a)));
+      setAlumnoEditar(null);
     } else {
-      // Si no hay item en edicion, se agrega uno nuevo
-      setItems([...items, { id: Date.now(), value }]);
+      setAlumnos([...alumnos, { ...alumno, id: Date.now() }]);
     }
   };
 
-  // Funcion que elimina un item segun su ID
-  const deleteItem = (id) => {
-    setItems(items.filter(item => item.id !== id));
+  // Elimina un alumno por ID
+  const eliminarAlumno = (id) => {
+    setAlumnos(alumnos.filter((a) => a.id !== id));
   };
 
-  // Funcion que selecciona un item para editar
-  const editItem = (item) => {
-    setItemToEdit(item);
+  // Selecciona un alumno para editar
+  const editarAlumno = (alumno) => {
+    setAlumnoEditar(alumno);
   };
 
   return (
     <div className="App">
-      <h1>CRUD con LocalStorage</h1>
-
-      {/* Componente del formulario para agregar o editar items */}
-      <Form
-        addOrUpdateItem={addOrUpdateItem}
-        itemToEdit={itemToEdit}
-      />
-
-      {/* Componente que muestra la lista de items */}
-      <List
-        items={items}
-        deleteItem={deleteItem}
-        editItem={editItem}
-      />
+      <h1>Evaluación de Alumnos</h1>
+      <Form agregarOActualizarAlumno={agregarOActualizarAlumno} alumnoEditar={alumnoEditar} />
+      <List alumnos={alumnos} eliminarAlumno={eliminarAlumno} editarAlumno={editarAlumno} />
     </div>
   );
 }

@@ -1,38 +1,76 @@
 import React, { useState, useEffect } from 'react';
 
-function Form({ addOrUpdateItem, itemToEdit }) {
-  // Estado del valor que el usuario escribe en el input
-  const [inputValue, setInputValue] = useState('');
+function Form({ agregarOActualizarAlumno, alumnoEditar }) {
+  const [nombre, setNombre] = useState('');
+  const [asignatura, setAsignatura] = useState('');
+  const [promedio, setPromedio] = useState('');
 
-  // Cuando cambia el item a editar, se actualiza el input con su valor
+  // Carga los datos en el formulario si se está editando un alumno
   useEffect(() => {
-    if (itemToEdit) {
-      setInputValue(itemToEdit.value); // Rellenar input si se esta editando
+    if (alumnoEditar) {
+      setNombre(alumnoEditar.nombre);
+      setAsignatura(alumnoEditar.asignatura);
+      setPromedio(alumnoEditar.promedio);
     } else {
-      setInputValue(''); // Limpiar input si no se edita nada
+      setNombre('');
+      setAsignatura('');
+      setPromedio('');
     }
-  }, [itemToEdit]);
+  }, [alumnoEditar]);
 
-  // Maneja el envio del formulario
   const handleSubmit = (e) => {
-    e.preventDefault(); // Evita recargar la pagina
+    e.preventDefault();
 
-    if (inputValue.trim()) {
-      addOrUpdateItem(inputValue); // Agrega o actualiza el item
-      setInputValue(''); // Limpia el input despues
+    // Validaciones básicas
+    if (!nombre.trim() || !asignatura.trim() || !promedio.trim()) {
+      alert('Todos los campos son obligatorios');
+      return;
     }
+
+    const promedioNum = parseFloat(promedio);
+    if (isNaN(promedioNum) || promedioNum < 1 || promedioNum > 7) {
+      alert('El promedio debe ser un número entre 1.0 y 7.0');
+      return;
+    }
+
+    // Prepara el alumno para guardar
+    const nuevoAlumno = {
+      nombre,
+      asignatura,
+      promedio: promedioNum.toFixed(1),
+    };
+
+    agregarOActualizarAlumno(nuevoAlumno);
+
+    // Limpia el formulario
+    setNombre('');
+    setAsignatura('');
+    setPromedio('');
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <input
         type="text"
-        value={inputValue} // Valor del input controlado por el estado
-        onChange={(e) => setInputValue(e.target.value)} // Actualiza el estado al escribir
+        placeholder="Nombre del alumno"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Asignatura"
+        value={asignatura}
+        onChange={(e) => setAsignatura(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Promedio (1.0 - 7.0)"
+        step="0.1"
+        value={promedio}
+        onChange={(e) => setPromedio(e.target.value)}
       />
       <button type="submit">
-        {/* El boton muestra 'Actualizar' si se esta editando un item */}
-        {itemToEdit ? 'Actualizar' : 'Agregar'}
+        {alumnoEditar ? 'Actualizar Alumno' : 'Agregar Alumno'}
       </button>
     </form>
   );
